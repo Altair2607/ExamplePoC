@@ -1,0 +1,50 @@
+@startuml EjemploPo
+skinparam sequenceMessageAlign right
+
+actor "PYME" as Pyme 
+participant "Via BCP" as ViaBCP
+participant "WebApp PartnerManagement" as WebAppPM
+participant "API BS Evaluation v4" as APIBSEvaluationv4
+participant "API Pyme Register" as APIPymeRegister
+database "PartnerManagement Database" as BDPartnerManagement 
+database "CCM Topic" as CcmTopic
+
+title PYME Register flow - OK 
+autonumber
+Pyme ->> ViaBCP: RegisterData
+note left: Pyme uses an form to enter data
+ViaBCP ->> WebAppPM : Invoque WebForm 
+activate WebAppPM
+alt IF Evaluation is OK
+    WebAppPM ->> APIBSEvaluationv4 : Evaluate PYME (POST)
+    activate APIBSEvaluationv4
+    APIBSEvaluationv4 -->> WebAppPM: Response OK
+    deactivate APIBSEvaluationv4    
+    activate BDPartnerManagement
+    WebAppPM ->> BDPartnerManagement: Register information 
+    deactivate BDPartnerManagement  
+    activate APIPymeRegister
+    WebAppPM ->> APIPymeRegister: Register PYME 
+    deactivate APIPymeRegister
+    activate CcmTopic
+    WebAppPM ->>  CcmTopic: notification successfull register to PYME by email 
+    deactivate CcmTopic
+else IF Evaluation is NOT OK
+    WebAppPM ->> APIBSEvaluationv4 : Evaluate PYME (POST)
+    APIBSEvaluationv4 -->> WebAppPM: Response NOT OK
+    WebAppPM  ->> Pyme : Show Error message
+     
+else IF Evaluation responses another 
+    WebAppPM ->> APIBSEvaluationv4 : Evaluate PYME (POST)
+    APIBSEvaluationv4 -->> WebAppPM: Response another message
+    WebAppPM  ->> Pyme : Show another message
+    
+end
+deactivate WebAppPM
+
+
+
+
+
+
+
