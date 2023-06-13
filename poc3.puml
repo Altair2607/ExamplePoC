@@ -9,8 +9,6 @@ activate BDPartnerManagement
 A ->> BDPartnerManagement: pyme registra en bd
 BDPartnerManagement->>A: Respuesta
 deactivate BDPartnerManagement
-
-
-
+BDPartnerManagement -->> ejemplo: example
 
 @enduml
