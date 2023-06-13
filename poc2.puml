@@ -38,8 +38,10 @@ else IF Evaluation responses another
     WebAppPM ->> APIBSEvaluationv4 : Evaluate PYME (POST)
     APIBSEvaluationv4 -->> WebAppPM: Response another message
     WebAppPM  ->> Pyme : Show another message
-    
+
 end
+note left: this is a example of IF and ELSE
+
 deactivate WebAppPM
 
 
