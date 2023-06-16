@@ -4,11 +4,19 @@ skinparam sequenceMessageAlign right
 actor "PYME" as A 
 database "PartnerManagement Database" as BDPartnerManagement
 database "ejemplo" as Ejemplo 
+participant "logs" as logs 
 
 activate BDPartnerManagement
 A ->> BDPartnerManagement: pyme registra en bd
 BDPartnerManagement->>A: Respuesta
 deactivate BDPartnerManagement
 BDPartnerManagement -->> ejemplo: example
+
+alt if Ejemplo isnt working 
+    BDPartnerManagement --> logs: writing error 
+end
+
+
+note left: this an note 
 
 @enduml

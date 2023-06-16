@@ -1,0 +1,91 @@
+@startuml Carlos Flujo
+skinparam sequenceMessageAlign right
+
+participant "Lynx" as Lynx
+participant "CBAF" as CBaf 
+participant  "Apis BCP" as APIBcp
+Database "Database CBAF" as DataCbaf
+Database "CCM" as Ccm 
+participant "Api Partner ccm" as APIPartCCM
+participant "Intelidata" as Intelidata
+Database "BD CCM" as BDCcm
+participant "Notificador  SMS" as NotiSMS
+participant "Notificador Whatsapp" as NotiWhats
+actor "Cliente" as Cliente
+
+
+autonumber
+activate Lynx 
+Lynx -> Lynx : Detecta una transaccion \n con sospecha de fraude
+Lynx -> CBaf: Envia request de transacción
+deactivate Lynx 
+activate CBaf
+activate DataCbaf
+CBaf -> DataCbaf: Registra transaccion
+CBaf -> APIBcp: Consulta informacion clientes 
+alt Es cliente BEX
+    DataCbaf --> CBaf: Response con data Es cliente 
+note left: Aqui se acaba el flujo 
+else No es cliente BEX
+    DataCbaf --> CBaf: Reponse con data No es cliente 
+    CBaf -> CBaf : Ejecuta reglas para definir \n  ID plantilla e ID estrategia 
+    CBaf ->> Ccm : Deja notificaciones
+    Intelidata ->> Ccm: Recoge notificacion 
+    Ccm -> BDCcm : Registra notificaciones en BD
+    Intelidata -> Intelidata : Consulta el workflow de fraudes a la \n  cual derivar la notificacion <<id de workflow>>
+    Intelidata -> Intelidata: Consulta datos \n de contactabilidad 
+    Intelidata -> Intelidata: Ejecuta la estrategia \n definida
+    group Estrategia 1
+        Intelidata -> Intelidata: Recupera <<ID plantilla>> \n y arma mensaje SMS 
+        Intelidata -> NotiSMS:  request SMS pregunta si fue fraude
+        NotiSMS -> Cliente: Envia SMS
+        alt Cliente responde SMS
+            Cliente --> NotiSMS : Response SMS 
+            NotiSMS --> Intelidata: Envia respuesta SMS
+            Intelidata -> Intelidata : Analiza el mensaje 
+            alt Es fraude
+                Intelidata -> NotiSMS: Request SMS con info de fraude "Bloquear la tarjeta"
+                NotiSMS -> Cliente : envia SMS informando fraude 
+                Intelidata --> APIPartCCM: Request respuesta codigo 002 
+                APIPartCCM --> CBaf: Request de respuesta codigo 002 
+            else No es fraude 
+                Intelidata -> NotiSMS: Request SMS informativo
+                NotiSMS -> Cliente : envia SMS informando "Gracias por responder"
+                Intelidata --> APIPartCCM: Request respuesta codigo 001
+                APIPartCCM --> CBaf: Request de respuesta codigo 001 
+            end  
+        else Cliente no responde SMS
+                alt No Pasaron 10 minutos 
+                    Intelidata -> Intelidata : Continua esperando 
+                else pasaron 10 minutos  
+                    Intelidata -> NotiWhats: Request whatsapp pregunta si fue fraude 
+                    NotiWhats -> Cliente: Whatsapp preguntando si fue fraude 
+                    alt Cliente responde whatsapp 
+                        Cliente --> NotiWhats : Cliente responde a whatsapp
+                        NotiWhats -> Intelidata: Notificador whatsapp envia a intelidata 
+                        Intelidata -> Intelidata: Analiza mensaje 
+                        alt Es fraude
+                            Intelidata -> NotiWhats: Request Whatsapp con info de fraude "Bloquear la tarjeta"
+                            NotiWhats -> Cliente : envia Whatsapp informando fraude 
+                            Intelidata --> APIPartCCM: Request respuesta codigo 002 
+                            APIPartCCM --> CBaf: Request de respuesta codigo 002 
+                         else No es fraude 
+                            Intelidata -> NotiWhats: Request Whatsapp informativo
+                            NotiWhats -> Cliente : envia Whatsapp informando "Gracias por responder"
+                            Intelidata --> APIPartCCM: Request respuesta codigo 001
+                            APIPartCCM --> CBaf: Request de respuesta codigo 001 
+                        end  
+                    else Cliente no responde whastsapp
+                        alt  no Pasaron 10 minutos
+                            Intelidata -> Intelidata: Sigue esperando 
+                        else  pasaron 10 minutos 
+                            Intelidata -> APIPartCCM: Request mensaje codigo 000
+                            APIPartCCM --> CBaf: Request de respuesta codigo 000 
+                        end 
+        
+        
+                    end 
+                end
+        end
+    end 
+end 

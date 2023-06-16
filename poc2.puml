@@ -11,6 +11,7 @@ database "CCM Topic" as CcmTopic
 
 title PYME Register flow - OK 
 autonumber
+ccmTopic ->> ViaBCP: texto 
 Pyme ->> ViaBCP: RegisterData
 note left: Pyme uses an form to enter data
 ViaBCP ->> WebAppPM : Invoque WebForm 
@@ -40,7 +41,7 @@ else IF Evaluation responses another
     WebAppPM  ->> Pyme : Show another message
 
 end
-note left: this is a example of IF and ELSE
+note left: this is an example of IF and ELSE
 
 deactivate WebAppPM
 
