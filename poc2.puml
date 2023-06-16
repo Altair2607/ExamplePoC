@@ -11,13 +11,12 @@ database "CCM Topic" as CcmTopic
 
 title PYME Register flow - OK 
 autonumber
-ccmTopic ->> ViaBCP: texto 
-Pyme ->> ViaBCP: RegisterData
+Pyme -> ViaBCP: RegisterData
 note left: Pyme uses an form to enter data
-ViaBCP ->> WebAppPM : Invoque WebForm 
+ViaBCP -> WebAppPM : Invoque WebForm 
 activate WebAppPM
 alt IF Evaluation is OK
-    WebAppPM ->> APIBSEvaluationv4 : Evaluate PYME (POST)
+    WebAppPM -> APIBSEvaluationv4 : Request
     activate APIBSEvaluationv4
     APIBSEvaluationv4 -->> WebAppPM: Response OK
     deactivate APIBSEvaluationv4    
@@ -41,12 +40,7 @@ else IF Evaluation responses another
     WebAppPM  ->> Pyme : Show another message
 
 end
-<<<<<<< HEAD
 note left: this is an example of IF and ELSE
-=======
-note left: this is a example of IF and ELSE
-note left: another test 
->>>>>>> 093cddac209df960ef2fa582811d16702e95fa57
 
 deactivate WebAppPM
 
