@@ -41,7 +41,12 @@ else IF Evaluation responses another
     WebAppPM  ->> Pyme : Show another message
 
 end
+<<<<<<< HEAD
 note left: this is an example of IF and ELSE
+=======
+note left: this is a example of IF and ELSE
+note left: another test 
+>>>>>>> 093cddac209df960ef2fa582811d16702e95fa57
 
 deactivate WebAppPM
 
